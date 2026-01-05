@@ -1,489 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Typing Test (Final)</title>
-  <style>
-    /* Base */
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      margin: 0;
-      padding: 30px;
-      background: #eef3f6;
-      color: #333;
-      font-size: 16px;
-    }
+<meta charset="UTF-8">
+<title>Court Typing Exam – Practice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    h2 { text-align: center; margin-bottom: 26px; font-weight: 700; }
+<style>
+* { box-sizing: border-box; }
 
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      max-width: 1200px;
-      margin: auto;
-    }
+body {
+  margin: 0;
+  background: #f4f6f8;
+  font-family: "Times New Roman", Times, serif;
+  color: #000;
+}
 
-    .card {
-      background: #fff;
-      padding: 18px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(17,24,39,0.06);
-    }
+/* HEADER */
+header {
+  background: #1f2937;
+  color: #fff;
+  padding: 12px 24px;
+  font-size: 17px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+#timer { color: #fde68a; }
 
-    .left { flex: 3; min-width: 0; }
-    .right { flex: 1; min-width: 300px; }
+/* PAGE */
+.page {
+  max-width: 900px;
+  margin: 30px auto;
+  background: #fff;
+  padding: 40px;
+  border: 1px solid #cbd5e1;
+}
 
-    #passage {
-      border: 1px solid #e3e6ea;
-      border-radius: 8px;
-      padding: 14px;
-      background: #fbfcfd;
-      height: 7.5em;
-      overflow-y: auto;
-      margin-bottom: 14px;
-      line-height: 1.6;
-      transition: all 0.15s ease;
-      white-space: pre-wrap;
-    }
+/* PASSAGE / RESULT TEXT */
+#textPanel {
+  font-size: 18px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  margin-bottom: 30px;
+}
 
-    textarea {
-      width: 100%;
-      height: 140px;
-      padding: 10px;
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 16px;
-      border: 1px solid #d6d9dc;
-      border-radius: 6px;
-      resize: none;
-      box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
-    }
+/* TYPING AREA (A4 FEEL) */
+#typingArea {
+  width: 100%;
+  height: 650px;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 18px;
+  line-height: 1.9;
+  border: 1px solid #000;
+  padding: 30px;
+  resize: none;
+  outline: none;
+  display: none;
+}
 
-    .controls-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+/* CONTROLS */
+.controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    #timer { margin-top: 10px; font-weight: bold; color: #c53030; }
+select, button {
+  font-family: inherit;
+  font-size: 15px;
+  padding: 6px 12px;
+}
 
-    button {
-      margin-top: 12px;
-      padding: 10px 16px;
-      font-size: 14px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-right: 10px;
-      transition: transform .08s ease, box-shadow .08s ease;
-      box-shadow: 0 6px 18px rgba(17,24,39,0.04);
-    }
+button {
+  border: 1px solid #000;
+  background: #e5e7eb;
+  cursor: pointer;
+}
 
-    button:active { transform: translateY(1px); }
-    #submitBtn { background-color: #c6f0cf; color: #1b5e20; }
-    #submitBtn:disabled { background-color: #eef6ee; color: #9fbfae; cursor: not-allowed; box-shadow: none; }
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-    #resetBtn { background-color: #6c757d; color: white; }
+/* RESULT SUMMARY */
+#resultBox {
+  margin-top: 40px;
+  border: 1px solid #000;
+  padding: 20px 30px;
+  display: none;
+}
 
-    .right select, .right input[type="checkbox"] { margin-bottom: 10px; }
+#resultBox h3 {
+  margin: 0 0 15px 0;
+  border-bottom: 1px solid #000;
+  padding-bottom: 8px;
+}
 
-    #result { margin-top: 18px; font-weight: 500; line-height: 1.9; }
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
 
-    /* Highlight classes */
-    .correct { color: #15803d; font-weight: 600; }
-    .wrong { color: #b91c1c; font-weight: 600; }
-    .correct-word { color: #6b7280; font-weight: 500; font-style: normal; margin-left: 4px; }
-    .omitted { color: #d97706; font-weight: 700; text-decoration: line-through; }
-    .blur { color: #777; opacity: 0.68; }
-
-    .muted { color: #6b7280; font-weight: 500; }
-
-    label { font-weight: 700; display:block; margin-bottom:6px; }
-    input[type="checkbox"] { margin-right:8px; transform: translateY(1px); }
-
-    .small { font-size: 13px; color:#555; }
-
-    @media (max-width: 900px) {
-      .container { flex-direction: column; }
-      .right { min-width: auto; width: 100%; }
-      .left { width: 100%; }
-      #passage { max-height: 200px; height: auto; }
-    }
-  </style>
+/* HIGHLIGHTS */
+.correct { color: #15803d; font-weight: bold; }
+.wrong { color: #b91c1c; font-weight: bold; }
+.correct-word { color: #374151; margin-left: 4px; }
+.omitted { text-decoration: line-through; }
+.blur { text-decoration: line-through; opacity: 0.4; }
+</style>
 </head>
+
 <body>
-  <h2>Typing Speed & Accuracy Test</h2>
-  <div class="container">
-    <div class="left card">
-      <div id="passage">Select a passage from the right to start...</div>
 
-      <textarea id="typingArea" placeholder="Start typing here..." disabled></textarea>
+<header>
+  COURT TYPING EXAM – PRACTICE
+  <span id="timer">Time Left: 10:00</span>
+</header>
 
-      <div id="timer">Time Left: 0s</div>
+<div class="page">
 
-      <div class="controls-row">
-        <button id="submitBtn" onclick="submitTest()" disabled>Submit</button>
-        <button id="resetBtn" onclick="resetTest()">Reset</button>
+  <div id="textPanel">
+    Select a passage and read it carefully. It will disappear once the test starts.
+  </div>
 
-        <label class="small" style="margin-left:auto;">
-          <input type="checkbox" id="allowBackspace" checked>
-          Allow Backspace
-        </label>
-      </div>
-    </div>
+  <textarea id="typingArea" placeholder="Type here exactly as memorized..."></textarea>
 
-    <div class="right card">
-      <label for="passageSelect">Select Passage:</label>
-      <select id="passageSelect" onchange="loadPassage()">
-        <option value="">-- Choose Passage --</option>
+  <div class="controls">
+    <div>
+      Passage:
+      <select id="passageSelect">
+        <option value="">-- Select --</option>
         <option value="0">Passage 1</option>
         <option value="1">Passage 2</option>
-        <option value="2">Passage 3</option>
-        <option value="3">Passage 4</option>
-        <option value="4">Passage 5</option>
-        <option value="5">Passage 6</option>
-        <option value="6">Passage 7</option>
-        <option value="7">Passage 8</option>
-        <option value="8">Passage 9</option>
-        <option value="9">Passage 10</option>
       </select>
 
-      <label for="timeSelect">Select Time:</label>
+      Time:
       <select id="timeSelect">
-        <option value="60">1 Minute</option>
-        <option value="120">2 Minutes</option>
-        <option value="300">5 Minutes</option>
-        <option value="600" selected>10 Minutes (default)</option>
+        <option value="600">10 Minutes</option>
         <option value="900">15 Minutes</option>
-        <option value="1200">20 Minutes</option>
       </select>
+    </div>
 
-      <div style="margin-top:8px;">
-        <label><input type="checkbox" id="autoScrollToggle" onchange="toggleAutoScroll()"> Auto-Scroll (Live Results)</label>
-        <label><input type="checkbox" id="liveHighlightToggle"> Live Word Highlight</label>
-      </div>
-
-      <div id="result" class="muted">
-        <!-- Live stats appear here -->
-      </div>
+    <div>
+      <button id="startBtn">Start Test</button>
+      <button id="submitBtn" disabled>Submit</button>
     </div>
   </div>
 
-  <script>
-    /*************** Passages ***************/
-    const passages = [
-      `The sun dipped below the horizon, casting hues of gold and crimson across the sky. The breeze carried the scent of blooming flowers and distant rain. Birds chirped their final songs of the day as the world prepared for rest. In this quiet moment, one could feel the heartbeat of nature — steady, calm, and eternal.`,
-      `Technology has transformed the way we live, work, and connect. From smartphones to artificial intelligence, innovations have bridged distances and streamlined our routines. While the benefits are immense, it's vital to ensure that we use technology responsibly. Digital well-being is just as important as productivity.`,
-      `Discipline is the bridge between goals and achievement. While talent opens doors, discipline ensures we walk through them consistently. It’s about showing up, even when motivation fades. It means doing the hard things, repeatedly, until excellence becomes second nature. Discipline is the true difference maker.`,
-      `Education is not merely about books and exams. It’s the awakening of curiosity, the nurturing of critical thought, and the ability to apply knowledge to real-world challenges. A truly educated person is not just literate but wise, empathetic, and adaptable. The future belongs to lifelong learners.`,
-      `India is a land of incredible diversity — in languages, cultures, festivals, and traditions. From the snowy Himalayas to the sunny beaches of the south, each region offers a unique flavor. Yet, in this diversity lies unity. A nation where Diwali, Eid, and Christmas are celebrated side by side.`,
-      `The power of nature is unmatched. Mountains inspire awe, oceans evoke mystery, and forests breathe life. Yet, this same nature is fragile. Deforestation, pollution, and climate change threaten the balance. It's not only about preserving beauty but ensuring survival. When we protect nature, we protect ourselves.`,
-      `Reading is more than a hobby; it's a journey into unknown worlds, ideas, and minds. It builds vocabulary, sharpens thinking, and deepens empathy. A single book can ignite change, offer comfort, or inspire dreams. In a world of distractions, reading anchors us — reminding us of the power of stillness.`,
-      `Hard work is timeless. In every era, those who succeeded were not always the smartest but often the most persistent. Consistent effort compounds. Day by day, brick by brick, greatness is built. Dreams without effort are illusions. But when effort meets vision, transformation begins.`,
-      `Health is the true wealth. Without it, no amount of money or success matters. A healthy body fuels a focused mind. Eating well, staying active, sleeping enough, and reducing stress are not luxuries but necessities. Investing in health today is saving for a better tomorrow.`,
-      `Adventure teaches us in ways routine cannot. It pushes us beyond comfort, forces us to adapt, and makes life richer. Whether it’s climbing a mountain, learning a new skill, or stepping into the unknown, adventure brings growth. Life, after all, is the greatest adventure of all.`
-    ];
+  <div id="resultBox"></div>
 
-    /*************** State ***************/
-    let passageText = "";
-    let keystrokes = 0;
-    let timer = null;
-    let timeLeft = 0;
-    let autoScroll = false;
-    let scrollTimer = null;
-    let liveResultTimer = null;
+</div>
 
-    const typingArea = document.getElementById("typingArea");
-    const submitBtn = document.getElementById("submitBtn");
-    const allowBackspaceCheckbox = document.getElementById("allowBackspace");
+<script>
+"use strict";
 
-    /*************** Events ***************/
-    // Count keystrokes; prevent backspace if disallowed
-    typingArea.addEventListener("keydown", (e) => {
-      // Backspace control
-      if (e.key === "Backspace" && !allowBackspaceCheckbox.checked) {
-        e.preventDefault();
-        // small visual feedback
-        flashTypingArea();
-        return;
-      }
+/* PASSAGES */
+const passages = [
+`Discipline plays a vital role in professional life, especially in judicial and administrative services. A disciplined individual follows rules, respects procedures, and performs duties with sincerity. In competitive examinations, discipline reflects in consistent practice and attention to detail.`,
 
-      // count printable characters (length 1) and Enter/Space/Tab as well
-      if (e.key.length === 1 || e.key === "Enter" || e.key === "Tab") {
-        keystrokes++;
-      }
+`The role of law in society is to establish order and protect rights. Courts interpret statutes, resolve disputes, and ensure justice is delivered fairly and efficiently.`
+];
 
-      // live highlight while typing if enabled
-      if (document.getElementById("liveHighlightToggle").checked) {
-        // small throttle: run in next tick (keystroke counted already)
-        setTimeout(updateLiveHighlight, 0);
-      }
-    });
+/* STATE */
+let timeLeft = 0;
+let timer = null;
+let mode = "view";
+let keystrokes = 0;
 
-    // helper to flash the typing area when backspace disabled
-    function flashTypingArea() {
-      const el = typingArea;
-      el.style.boxShadow = "0 0 0 3px rgba(220,53,69,0.15)";
-      setTimeout(() => el.style.boxShadow = "inset 0 1px 0 rgba(0,0,0,0.02)", 220);
+/* ELEMENTS */
+const textPanel = document.getElementById("textPanel");
+const typingArea = document.getElementById("typingArea");
+const timerSpan = document.getElementById("timer");
+const startBtn = document.getElementById("startBtn");
+const submitBtn = document.getElementById("submitBtn");
+const resultBox = document.getElementById("resultBox");
+
+/* UTIL */
+function splitWords(t){ return t.trim().split(/\s+/); }
+
+/* ALIGNMENT LOGIC (UNCHANGED) */
+function alignAndClassify(given, typed){
+  let res=[], i=0, j=0;
+  while(j<typed.length && i<given.length){
+    if(typed[j] === given[i]){
+      res.push({t:"c", g:given[i]}); i++; j++;
+    } else if(i+1 < given.length && typed[j] === given[i+1]){
+      res.push({t:"o", g:given[i]}); i++;
+    } else {
+      res.push({t:"w", g:given[i], u:typed[j]}); i++; j++;
     }
+  }
+  while(j<typed.length){
+    res.push({t:"w", u:typed[j]}); j++;
+  }
+  return {res, tail:i};
+}
 
-    /*************** Utilities ***************/
-    function splitWordsKeepPunct(text) {
-      if (!text) return [];
-      // split on whitespace - preserves punctuation attached to words
-      return text.trim().split(/\s+/);
-    }
+/* RESET FUNCTION (KEY FIX) */
+function resetToViewMode(){
+  mode = "view";
+  clearInterval(timer);
+  timer = null;
 
-    function escapeHtml(s) {
-      if (s === undefined || s === null) return '';
-      return s.replace(/[&<>'"]/g, function (c) {
-        return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
-      });
-    }
+  typingArea.style.display = "none";
+  typingArea.value = "";
 
-    /*************** Load / Timer / Controls ***************/
-    function loadPassage() {
-      const index = document.getElementById("passageSelect").value;
-      if (index === "") return;
-      passageText = passages[index];
-      document.getElementById("passage").innerText = passageText;
-      typingArea.value = "";
-      typingArea.disabled = false;
-      submitBtn.disabled = false;
-      typingArea.focus();
-      keystrokes = 0;
-      timeLeft = parseInt(document.getElementById("timeSelect").value) || 600;
-      document.getElementById("timer").innerText = `Time Left: ${timeLeft}s`;
-      startTimer();
-      toggleAutoScroll();
-      // clear any live result intervals if toggled
-      if (!document.getElementById("autoScrollToggle").checked) updateLiveResults();
-    }
+  textPanel.style.display = "block";
 
-    function startTimer() {
+  startBtn.disabled = false;
+  submitBtn.disabled = true;
+
+  resultBox.style.display = "none";
+  resultBox.innerHTML = "";
+
+  keystrokes = 0;
+  timerSpan.innerText = "Time Left: 10:00";
+}
+
+/* PASSAGE CHANGE */
+document.getElementById("passageSelect").onchange = e => {
+  if(e.target.value === "") return;
+  resetToViewMode();
+  textPanel.innerText = passages[e.target.value];
+};
+
+/* START TEST */
+startBtn.onclick = () => {
+  if(!textPanel.innerText.trim()) return;
+
+  resetToViewMode();     // safety
+  mode = "exam";
+
+  typingArea.style.display = "block";
+  textPanel.style.display = "none";
+  typingArea.focus();
+
+  startBtn.disabled = true;
+  submitBtn.disabled = false;
+
+  timeLeft = parseInt(timeSelect.value);
+  updateTimer();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if(timeLeft <= 0){
       clearInterval(timer);
-      timer = setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").innerText = `Time Left: ${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          // auto-stop and submit
-          submitTest();
-        }
-      }, 1000);
+      submitTest();
     }
+  }, 1000);
+};
 
-    function toggleAutoScroll() {
-      autoScroll = document.getElementById("autoScrollToggle").checked;
-      clearInterval(scrollTimer);
-      clearInterval(liveResultTimer);
-      if (autoScroll) {
-        scrollTimer = setInterval(() => {
-          const passageBox = document.getElementById("passage");
-          if (passageBox.scrollTop < passageBox.scrollHeight - passageBox.clientHeight) {
-            passageBox.scrollTop += 2;
-          }
-        }, 200);
-        liveResultTimer = setInterval(updateLiveResults, 1000);
-      }
+/* KEYSTROKES */
+typingArea.addEventListener("keydown", e => {
+  if(e.key.length === 1 || e.key === "Backspace" || e.key === "Enter" || e.key === " "){
+    keystrokes++;
+  }
+});
+
+/* SUBMIT */
+submitBtn.onclick = submitTest;
+
+/* TIMER */
+function updateTimer(){
+  const m = Math.floor(timeLeft/60);
+  const s = timeLeft % 60;
+  timerSpan.innerText = `Time Left: ${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+/* SUBMIT LOGIC */
+function submitTest(){
+  if(mode !== "exam") return;
+  mode = "result";
+  clearInterval(timer);
+
+  typingArea.style.display = "none";
+  submitBtn.disabled = true;
+
+  const given = splitWords(textPanel.innerText);
+  const typed = splitWords(typingArea.value);
+  const {res, tail} = alignAndClassify(given, typed);
+
+  let html = "", correct = 0, wrong = 0;
+
+  res.forEach(r => {
+    if(r.t === "c"){
+      html += `<span class="correct">${r.g}</span> `;
+      correct++;
+    } else if(r.t === "o"){
+      html += `<span class="omitted">${r.g}</span> `;
+      wrong++;
+    } else {
+      html += `<span class="wrong">${r.u}</span><span class="correct-word">(${r.g||""})</span> `;
+      wrong++;
     }
+  });
 
-    /*************** Alignment & Classification ***************/
-    // returns { results: [ {type, given, typed} ... ], tailIndex }
-    // types: 'correct', 'wrong', 'omitted'
-    function alignAndClassify(givenWords, userWords) {
-      const results = [];
-      let i = 0, j = 0;
+  for(let i = tail; i < given.length; i++){
+    html += `<span class="blur">${given[i]}</span> `;
+  }
 
-      while (j < userWords.length && i < givenWords.length) {
-        const given = givenWords[i];
-        const typed = userWords[j];
+  textPanel.style.display = "block";
+  textPanel.innerHTML = html;
 
-        if (typed === given) {
-          results.push({ type: 'correct', given, typed });
-          i++; j++;
-        } else if (i + 1 < givenWords.length && typed === givenWords[i + 1]) {
-          // user skipped (omitted) given[i]
-          results.push({ type: 'omitted', given, typed: undefined });
-          i++; // j unchanged so typed will be compared to next given on next loop
-        } else {
-          // substitution or extra typed word
-          results.push({ type: 'wrong', given, typed });
-          i++; j++;
-        }
-      }
+  const timeUsed = (parseInt(timeSelect.value) - timeLeft) || 1;
+  const wpm = ((correct / timeUsed) * 60).toFixed(2);
+  const kpm = ((keystrokes / timeUsed) * 60).toFixed(2);
+  const accuracy = ((correct / (correct + wrong)) * 100).toFixed(2);
 
-      // Remaining typed words beyond given: mark as wrong extras
-      while (j < userWords.length) {
-        results.push({ type: 'wrong', given: undefined, typed: userWords[j] });
-        j++;
-      }
+  resultBox.style.display = "block";
+  resultBox.innerHTML = `
+    <h3>Evaluation Summary</h3>
+    <div class="summary-row"><span>Correct Words</span><span>${correct}</span></div>
+    <div class="summary-row"><span>Incorrect Words</span><span>${wrong}</span></div>
+    <div class="summary-row"><span>Accuracy</span><span>${accuracy} %</span></div>
+    <div class="summary-row"><span>Keystrokes Typed</span><span>${keystrokes}</span></div>
+    <div class="summary-row"><span>WPM</span><span>${wpm}</span></div>
+    <div class="summary-row"><span>KPM</span><span>${kpm}</span></div>
+  `;
+}
+</script>
 
-      // tailIndex: first unprocessed given index
-      return { results, tailIndex: i };
-    }
-
-    /*************** Live Results & Highlight ***************/
-    function updateLiveResults() {
-      const givenWords = splitWordsKeepPunct(passageText);
-      const userWords = splitWordsKeepPunct(typingArea.value);
-      const aligned = alignAndClassify(givenWords, userWords);
-      const { results } = aligned;
-
-      let correct = 0, wrongOnly = 0, omitted = 0;
-      results.forEach(r => {
-        if (r.type === 'correct') correct++;
-        else if (r.type === 'wrong') wrongOnly++;
-        else if (r.type === 'omitted') omitted++;
-      });
-
-      const mistakes = wrongOnly + omitted; // combined
-      const displayedWrong = mistakes;
-
-      const selectedTime = parseInt(document.getElementById("timeSelect").value) || 600;
-      const timeUsed = Math.max(0, selectedTime - timeLeft); // seconds used so far
-      // WPM uses correct words and timeUsed
-      const wpm = timeUsed > 0 ? ((correct / timeUsed) * 60).toFixed(2) : "0.00";
-      const accuracy = (correct + mistakes) > 0 ? ((correct / (correct + mistakes)) * 100).toFixed(2) : "0.00";
-      // KPM: keystrokes per minute - use timeUsed if >0 else selectedTime baseline
-      const minutesForKpm = (timeUsed > 0 ? timeUsed : selectedTime) / 60;
-      const kpm = minutesForKpm > 0 ? (keystrokes / minutesForKpm).toFixed(2) : "0.00";
-
-      document.getElementById("result").innerHTML = `
-        ✅ Correct: ${correct}<br>
-        ❌ Wrong: ${displayedWrong}<br>
-        ⚠️ Omitted: ${omitted}<br>
-        ⌨️ Keystrokes: ${keystrokes}<br>
-        🎯 Accuracy: ${accuracy}%<br>
-        📝 WPM: ${wpm}<br>
-        🔢 KPM: ${kpm}<br>
-        ⏳ Time Used: ${timeUsed}s
-      `;
-    }
-
-    function updateLiveHighlight() {
-      const givenWords = splitWordsKeepPunct(passageText);
-      const userWords = splitWordsKeepPunct(typingArea.value);
-      const aligned = alignAndClassify(givenWords, userWords);
-      const { results, tailIndex } = aligned;
-
-      let html = "";
-      results.forEach(r => {
-        if (r.type === 'correct') {
-          html += `<span class="correct">${escapeHtml(r.given)}</span> `;
-        } else if (r.type === 'wrong') {
-          // show user's typed word (if exists) in red, then the correct word in parentheses (grey)
-          if (r.typed !== undefined) {
-            html += `<span class="wrong">${escapeHtml(r.typed)}</span>`;
-            if (r.given !== undefined) html += ` <span class="correct-word">(${escapeHtml(r.given)})</span>`;
-            html += " ";
-          } else {
-            // no typed (rare), show given as wrong
-            html += `<span class="wrong">${escapeHtml(r.given || '')}</span> `;
-          }
-        } else if (r.type === 'omitted') {
-          html += `<span class="omitted">${escapeHtml(r.given)}</span> `;
-        }
-      });
-
-      // tail - blur the rest
-      for (let k = tailIndex; k < givenWords.length; k++) {
-        html += `<span class="blur">${escapeHtml(givenWords[k])}</span> `;
-      }
-
-      document.getElementById("passage").innerHTML = html.trim();
-      // also update stats
-      updateLiveResults();
-    }
-
-    /*************** Submit / Reset ***************/
-    function submitTest() {
-      if (submitBtn.disabled) return;
-      clearInterval(timer); clearInterval(scrollTimer); clearInterval(liveResultTimer);
-
-      typingArea.disabled = true; submitBtn.disabled = true;
-
-      const givenWords = splitWordsKeepPunct(passageText);
-      const userWords = splitWordsKeepPunct(typingArea.value);
-      const aligned = alignAndClassify(givenWords, userWords);
-      const { results, tailIndex } = aligned;
-
-      let correct = 0, wrongOnly = 0, omitted = 0;
-      let highlighted = "";
-
-      results.forEach(r => {
-        if (r.type === 'correct') {
-          highlighted += `<span class="correct">${escapeHtml(r.given)}</span> `;
-          correct++;
-        } else if (r.type === 'wrong') {
-          if (r.typed !== undefined) {
-            highlighted += `<span class="wrong">${escapeHtml(r.typed)}</span>`;
-            if (r.given !== undefined) highlighted += ` <span class="correct-word">(${escapeHtml(r.given)})</span>`;
-            highlighted += " ";
-          } else {
-            highlighted += `<span class="wrong">${escapeHtml(r.given || '')}</span> `;
-          }
-          wrongOnly++;
-        } else if (r.type === 'omitted') {
-          highlighted += `<span class="omitted">${escapeHtml(r.given)}</span> `;
-          omitted++;
-        }
-      });
-
-      // tail: remaining given words blurred
-      for (let k = tailIndex; k < givenWords.length; k++) {
-        highlighted += `<span class="blur">${escapeHtml(givenWords[k])}</span> `;
-      }
-
-      // combined mistakes
-      const mistakes = wrongOnly + omitted;
-      const displayedWrong = mistakes;
-
-      const selectedTime = parseInt(document.getElementById("timeSelect").value) || 600;
-      const timeUsed = Math.max(0, selectedTime - timeLeft); // seconds used
-      const accuracy = (correct + mistakes) > 0 ? ((correct / (correct + mistakes)) * 100).toFixed(2) : "0.00";
-      const wpm = timeUsed > 0 ? ((correct / timeUsed) * 60).toFixed(2) : "0.00";
-      const minutesForKpm = (timeUsed > 0 ? timeUsed : selectedTime) / 60;
-      const kpm = minutesForKpm > 0 ? (keystrokes / minutesForKpm).toFixed(2) : "0.00";
-
-      document.getElementById("passage").innerHTML = highlighted.trim();
-      document.getElementById("result").innerHTML = `
-        ✅ Correct: ${correct}<br>
-        ❌ Wrong: ${displayedWrong}<br>
-        ⚠️ Omitted: ${omitted}<br>
-        ⌨️ Keystrokes: ${keystrokes}<br>
-        🎯 Accuracy: ${accuracy}%<br>
-        📝 WPM: ${wpm}<br>
-        🔢 KPM: ${kpm}<br>
-        ⏳ Time Used: ${timeUsed}s
-      `;
-    }
-
-    function resetTest() {
-      clearInterval(timer); clearInterval(scrollTimer); clearInterval(liveResultTimer);
-      typingArea.value = ""; typingArea.disabled = true; submitBtn.disabled = true;
-      document.getElementById("result").innerHTML = "";
-      document.getElementById("passage").innerText = "Select a passage from the right to start...";
-      document.getElementById("timer").innerText = "Time Left: 0s";
-      keystrokes = 0;
-    }
-
-    /*************** Init small binding for toggles ***************/
-    // toggle autoScroll when checkbox changed
-    document.getElementById("autoScrollToggle").addEventListener("change", toggleAutoScroll);
-
-    // liveHighlight checkbox simply toggles behavior; update highlight when switched on
-    document.getElementById("liveHighlightToggle").addEventListener("change", (e) => {
-      if (e.target.checked) updateLiveHighlight();
-      else {
-        // revert to plain passage if live highlight disabled (but keep last stats)
-        document.getElementById("passage").innerText = passageText || "Select a passage from the right to start...";
-      }
-    });
-
-    // set default states on load
-    (function initDefaults() {
-      // make 10 minutes default is already selected in HTML
-      document.getElementById("result").innerHTML = "";
-    })();
-
-  </script>
 </body>
 </html>
